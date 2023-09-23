@@ -1,0 +1,224 @@
+--[[
+
+	chams made for all ants/spiders including eggs.
+
+	made by fireztron @ v3rm
+--]]
+
+repeat wait() until game:IsLoaded()
+
+--// ESSENTIAL VARS
+
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+
+local ScreenGui = Instance.new("ScreenGui",game:GetService('CoreGui'))
+local ESPLocation = Instance.new("Folder",ScreenGui)
+
+--// CHAM PART FUNCTION
+
+local function chamsPart(part, size, color, player)
+    if not player or player ~= LP then
+        local boxAdornment = Instance.new("BoxHandleAdornment")
+        boxAdornment.Name = part.Name.. " HandleAdornment"
+        boxAdornment.Size = part.Size / size
+        boxAdornment.Transparency = .9
+        boxAdornment.Color3 = color
+        boxAdornment.ZIndex = 1
+        boxAdornment.AlwaysOnTop = true
+        boxAdornment.Adornee = part
+        boxAdornment.Parent = ESPLocation
+        if player then
+            player.CharacterRemoving:Connect(function()
+                boxAdornment:Destroy()
+            end)
+        end
+    end
+end
+
+--// ANT CHAM COLOR FUNCTION
+
+local function getAntColor(antType, antNiche)
+    local color
+    if _G.antdefaultColors[antNiche] then
+        color = _G.antdefaultColors[antNiche]
+    elseif _G.antchamColors[antType] then
+        color = _G.antchamColors[antType]
+    else
+        --print("ANT COLOR NOT SET, DEFAULTING TO WHITE")
+        color = Color3.fromRGB(255,255,255)
+    end
+    return color
+end
+
+--// ANT CHAM SIZE FUNCTION
+
+local function getAntSize(antNiche)
+    local size
+    if _G.antdefaultSize[antNiche] then
+        size = _G.antdefaultSize[antNiche]
+    else
+        --print("ANT SIZE NOT SET, DEFAULTING TO 1.5")
+        size = 1.5
+    end
+    return size
+end
+
+--// LOAD ANT CHAMS
+
+for antType, color in pairs(_G.antchamColors) do
+    for _, antNiche in pairs(workspace.Ant[antType]:GetChildren()) do
+        if antNiche.Name ~= "Eggs" then
+            for _, antChar in pairs(antNiche:GetChildren()) do
+                for _, antPart in pairs(antChar:GetDescendants()) do
+                    if antPart:IsA("Part") or antPart:IsA("MeshPart") then
+                        local color = getAntColor(antType, antNiche.Name)
+                        local size = getAntSize(antNiche.Name)
+                        chamsPart(antPart, size, color, Players:GetPlayerFromCharacter(antChar))
+                    end
+                end
+            end
+        end
+    end
+end
+
+--// LOAD NEW ANT CHAMS
+
+for antType, color in pairs (_G.antchamColors) do
+    for _, antNiche in pairs(workspace.Ant[antType]:GetChildren()) do
+        if antNiche.Name ~= "Eggs" then
+            antNiche.ChildAdded:Connect(function(antChar)
+                antChar:WaitForChild("HumanoidRootPart")
+                for _, antPart in pairs(antChar:GetDescendants()) do
+                    if antPart:IsA("Part") or antPart:IsA("MeshPart") then
+                        local color = getAntColor(antType, antNiche.Name)
+                        local size = getAntSize(antNiche.Name)
+                        chamsPart(antPart, size, color, Players:GetPlayerFromCharacter(antChar))
+                    end
+                end
+            end)
+        end
+    end
+end
+
+
+--// SPIDER CHAM COLOR FUNCTION
+
+local function getSpiderColor(spiderType, spiderNiche)
+    local color
+    if _G.spiderchamColors[spiderType] then
+        color = _G.spiderchamColors[spiderType]
+    else
+        --print("SPIDER COLOR NOT SET, DEFAULTING TO BLACK")
+        color = Color3.fromRGB(0,0,0)
+    end
+    return color
+end
+
+--// SPIDER CHAM SIZE FUNCTION
+
+local function getSpiderSize(spiderNiche)
+    local size
+    if _G.spiderdefaultSize[spiderNiche] then
+        size = _G.spiderdefaultSize[spiderNiche]
+    else
+        --print("ANT SIZE NOT SET, DEFAULTING TO 1.5")
+        size = 1.5
+    end
+    return size
+end
+
+--// LOAD SPIDER CHAMS
+
+for spiderType, color in pairs (_G.spiderchamColors) do
+    for _, spiderNiche in pairs(workspace.Special[spiderType]:GetChildren()) do
+        if spiderNiche.Name ~= "Eggs" then
+            for _, spiderChar in pairs(spiderNiche:GetChildren()) do
+                for _, spiderPart in pairs(spiderChar:GetDescendants()) do
+                    if spiderPart:IsA("Part") or spiderPart:IsA("MeshPart") and spiderPart.Name ~= "HumanoidRootPart" then
+                        local color = getSpiderColor(spiderType, spiderNiche.Name)
+                        local size = getSpiderSize(spiderNiche.Name)
+                        chamsPart(spiderPart, size, color, Players:GetPlayerFromCharacter(spiderChar))
+                    end
+                end
+            end
+        end
+    end
+end
+
+--// LOAD NEW SPIDER CHAMS
+
+for spiderType, color in pairs (_G.spiderchamColors) do
+    for _, spiderNiche in pairs(workspace.Special[spiderType]:GetChildren()) do
+        if spiderNiche.Name ~= "Eggs" then
+            spiderNiche.ChildAdded:Connect(function(spiderChar)
+                spiderChar:WaitForChild("HumanoidRootPart")
+                for _, spiderPart in pairs(spiderChar:GetDescendants()) do
+                    if spiderPart:IsA("Part") or spiderPart:IsA("MeshPart") and spiderPart.Name ~= "HumanoidRootPart" then
+                        local color = getSpiderColor(spiderType, spiderNiche.Name)
+                        local size = getSpiderSize(spiderNiche.Name)
+                        chamsPart(spiderPart, size, color, Players:GetPlayerFromCharacter(spiderChar))
+                    end
+                end
+            end)
+        end
+    end
+end
+
+--// LOAD ANT EGG CHAMS
+
+for _, antType in pairs(workspace.Ant:GetChildren()) do
+    for _, antNiche in pairs(antType:GetChildren()) do
+        if antNiche.Name == "Eggs" then
+            for _, egg in pairs(antNiche:GetChildren()) do
+                local color = _G.antdefaultColors["Eggs"]
+                local size = 1.5
+                chamsPart(egg, size, color)
+            end
+        end
+    end
+end
+
+--// LOAD NEW ANT EGG CHAMS
+
+for _, antType in pairs(workspace.Ant:GetChildren()) do
+    for _, antNiche in pairs(antType:GetChildren()) do
+        if antNiche.Name == "Eggs" then
+            antNiche.ChildAdded:Connect(function(egg)
+                local color = _G.antdefaultColors["Eggs"]
+                local size = 1.5
+                chamsPart(egg, size, color)
+            end)
+        end
+    end
+end
+
+--// LOAD SPIDER EGG CHAMS
+
+for _, spiderType in pairs(workspace.Special:GetChildren()) do
+    for _, spiderNiche in pairs(spiderType:GetChildren()) do
+        if spiderNiche.Name == "Eggs" then
+            for _, egg in pairs(spiderNiche:GetChildren()) do
+                local color = _G.spiderdefaultColors["Eggs"]
+                local size = 1.5
+                chamsPart(egg, size, color)
+            end
+        end
+    end
+end
+
+--// LOAD NEW SPIDER EGG CHAMS
+
+for _, spiderType in pairs(workspace.Special:GetChildren()) do
+    for _, spiderNiche in pairs(spiderType:GetChildren()) do
+        if spiderNiche.Name == "Eggs" then
+            spiderNiche.ChildAdded:Connect(function(egg)
+                local color = _G.spiderdefaultColors["Eggs"]
+                local size = 1.5
+                chamsPart(egg, size, color)
+            end)
+        end
+    end
+end
+
+warn("loaded chams")
