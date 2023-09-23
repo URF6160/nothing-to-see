@@ -1,0 +1,56 @@
+repeat wait() until game:IsLoaded()
+if not _G.killaura then _G.killaura = true end
+
+--// ESSENTIAL VARS
+
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local humanoids = {}
+
+--// ADD HUMS INTO TABLE
+
+for _,plr in pairs(Players:GetPlayers()) do
+    if plr ~= LP and plr.Character then
+        for _,hum in pairs(plr.Character:GetChildren()) do
+            if hum:IsA("Humanoid") then
+                table.insert(humanoids, hum)
+            end
+        end
+        plr.CharacterAdded:Connect(function(char)
+            local hum = char:WaitForChild("Humanoid")
+            table.insert(humanoids, hum)
+        end)
+    end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(char)
+        local hum = char:WaitForChild("Humanoid")
+        table.insert(humanoids, hum)
+    end)
+end)
+
+--// KILL AURA LOOP
+
+coroutine.wrap(function() --apparently coroutine's better
+    while _G.killaura == true do
+        wait()
+        for _,hum in ipairs(humanoids) do
+            if hum.Parent and LP.Character and not hum:IsDescendantOf(workspace.Carcasses) then
+                local enemyhrp = hum.Parent:FindFirstChild("HumanoidRootPart")
+                local hrp = LP.Character:FindFirstChild("HumanoidRootPart")
+                if enemyhrp and hrp and (enemyhrp.Position - hrp.Position).Magnitude < 15 then
+                    local args = {
+                        [1] = "heavy",
+                        [2] = hum
+                    }
+
+                    game:GetService("ReplicatedStorage").Remotes.Bite:FireServer(unpack(args))
+                    print("firing", hum:GetFullName())
+                end
+            end
+        end
+    end
+end)()
+
+warn("loaded killaura")
