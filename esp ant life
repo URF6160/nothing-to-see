@@ -1,0 +1,77 @@
+repeat wait() until game:IsLoaded()
+if not _G.maxdistance then _G.maxdistance = 500 end
+
+local runService = game:GetService('RunService')
+
+--// ESPPART FUNCTION
+
+local function espPart(part, text, color)
+    for i,v in pairs(getconnections(part.ChildAdded)) do
+        v:Disable()
+    end
+	local billgui = Instance.new('BillboardGui', part)
+	local textlab = Instance.new('TextLabel', billgui)
+
+	billgui.Name = "ESP"
+	billgui.AlwaysOnTop = true
+	billgui.ExtentsOffset = Vector3.new(0, 3, 0)
+	billgui.Size = UDim2.new(10, 0, 10, 0)
+    billgui.MaxDistance = _G.maxdistance or 500
+
+	textlab.Name = 'Player'
+	textlab.BackgroundColor3 = Color3.new(255, 255, 255)
+	textlab.BackgroundTransparency = 1    
+	textlab.BorderSizePixel = 0
+	textlab.Position = UDim2.new(0, 0, 0, 0)
+	textlab.Size = UDim2.new(1, 0, 1, 0)
+	textlab.Visible = true
+	textlab.ZIndex = 10
+	textlab.Font = 'SciFi'
+	textlab.FontSize = 'Size14'
+	textlab.Text = text
+	textlab.TextTransparency = 0
+	textlab.TextStrokeTransparency = 1
+	textlab.TextColor3 = color
+end
+
+--// LOAD ESP FOOD
+
+for _,larvae in pairs(workspace.Carcasses:GetChildren()) do
+    local positions = {}
+    for _,larvaePart in pairs(larvae:GetChildren()) do
+        if larvaePart:IsA("MeshPart") then
+            espPart(larvaePart, "FOOD", Color3.fromRGB(0,255,127))
+        end
+    end  
+end
+
+--// LOAD NEW ESP FOOD
+workspace.Carcasses.ChildAdded:Connect(function(larvae)
+    local positions = {}
+    for _,larvaePart in pairs(larvae:GetChildren()) do
+        if larvaePart:IsA("MeshPart") then
+            espPart(larvaePart, "FOOD", Color3.fromRGB(0,255,127))
+        end
+    end    
+end)
+
+--// LOAD NPC ESP
+
+for _,larvae in pairs(workspace.AI:GetChildren()) do
+    for _,larvaePart in pairs(larvae:GetChildren()) do
+        if larvaePart.Name == "HumanoidRootPart" then
+            espPart(larvaePart, "NPC LARVAE", Color3.fromRGB(255,255,127))
+        end
+    end
+end
+
+--// LOAD NEW NPC ESP
+
+workspace.AI.ChildAdded:Connect(function(larvae)
+    larvae.ChildAdded:Connect(function(larvaePart)
+        if larvaePart.Name == "HumanoidRootPart" then
+            espPart(larvaePart, "NPC LARVAE", Color3.fromRGB(255,255,127))
+        end
+    end)
+end)
+warn("loaded esp")
